@@ -1,0 +1,10 @@
+@import url('./main-layout.css');
+@import url('./views/items-view.css');
+@import url('./views/customers-view.css');
+@import url('./views/orders-view.css');
+@import url('./views/discount-codes-view.css');
+@import url('./views/sales-view.css');
+@import url('line-awesome/dist/line-awesome/css/line-awesome.min.css');    html {
+      --lumo-base-color: #fffafa;
+
+    }
