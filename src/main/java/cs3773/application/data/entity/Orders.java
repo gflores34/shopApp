@@ -11,7 +11,10 @@ public class Orders extends AbstractEntity {
     private String status;
     private LocalDate orderDate;
     private LocalDate deliveryDate;
+    private String discountCode;
 
+    public String getDiscountCode() {return discountCode;}
+    public void setDiscountCode(String discountCode) {this.discountCode = discountCode;}
     public Integer getCustId() {
         return custId;
     }

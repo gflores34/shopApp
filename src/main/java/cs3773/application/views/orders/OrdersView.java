@@ -72,6 +72,7 @@ public class OrdersView extends Div implements BeforeEnterObserver {
         grid.addColumn("custId").setAutoWidth(true);
         grid.addColumn("totalPrice").setAutoWidth(true);
         grid.addColumn("status").setAutoWidth(true);
+        grid.addColumn("discountCode").setAutoWidth(true);
         grid.addColumn("orderDate").setAutoWidth(true);
         grid.addColumn("deliveryDate").setAutoWidth(true);
         grid.setItems(query -> ordersService.list(

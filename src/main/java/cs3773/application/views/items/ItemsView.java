@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.data.binder.ValidationException;
+import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.renderer.LitRenderer;
 import com.vaadin.flow.router.BeforeEnterEvent;
@@ -26,6 +27,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.data.VaadinSpringDataHelpers;
 import cs3773.application.data.entity.Item;
+import cs3773.application.data.generator.DataGenerator;
 import cs3773.application.data.service.ItemService;
 import cs3773.application.views.MainLayout;
 import elemental.json.Json;
@@ -68,6 +70,9 @@ public class ItemsView extends Div implements BeforeEnterObserver {
 
     @Autowired
     public ItemsView(ItemService itemService) {
+        DataGenerator dg = new DataGenerator();
+
+
         this.itemService = itemService;
         addClassNames("items-view");
 
@@ -83,7 +88,11 @@ public class ItemsView extends Div implements BeforeEnterObserver {
         grid.addColumn("name").setAutoWidth(true);
         grid.addColumn("stock").setAutoWidth(true);
         grid.addColumn("itemType").setAutoWidth(true);
+
+
+        LitRenderer<Item> priceRenderer = LitRenderer.<Item>of("$ ").withProperty("price", Item::getPrice);
         grid.addColumn("price").setAutoWidth(true);
+
         LitRenderer<Item> imgURLRenderer = LitRenderer.<Item>of("<img style='height: 64px' src=${item.imgURL} />")
                 .withProperty("imgURL", Item::getImgURL);
         grid.addColumn(imgURLRenderer).setHeader("Img URL").setWidth("68px").setFlexGrow(0);
@@ -108,7 +117,7 @@ public class ItemsView extends Div implements BeforeEnterObserver {
 
         // Bind fields. This is where you'd define e.g. validation rules
         binder.forField(stock).withConverter(new StringToIntegerConverter("Only numbers are allowed")).bind("stock");
-        binder.forField(price).withConverter(new StringToIntegerConverter("Only numbers are allowed")).bind("price");
+        binder.forField(price).withConverter(new StringToDoubleConverter("Only numbers are allowed")).bind("price");
 
         binder.bindInstanceFields(this);
 

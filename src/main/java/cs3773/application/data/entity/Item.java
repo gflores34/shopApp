@@ -9,7 +9,7 @@ public class Item extends AbstractEntity {
     private String name;
     private Integer stock;
     private String itemType;
-    private Integer price;
+    private double price;
     @Lob
     private String imgURL;
 
@@ -31,10 +31,10 @@ public class Item extends AbstractEntity {
     public void setItemType(String itemType) {
         this.itemType = itemType;
     }
-    public Integer getPrice() {
+    public double getPrice() {
         return price;
     }
-    public void setPrice(Integer price) {
+    public void setPrice(double price) {
         this.price = price;
     }
     public String getImgURL() {

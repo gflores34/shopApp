@@ -16,6 +16,9 @@ import cs3773.application.data.service.ItemRepository;
 import cs3773.application.data.service.OrdersRepository;
 import cs3773.application.data.service.SaleRepository;
 import cs3773.application.data.service.UserRepository;
+
+import java.sql.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Set;
@@ -25,8 +28,22 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import javax.swing.plaf.nimbus.State;
+
 @SpringComponent
 public class DataGenerator {
+
+    public Connection connectDB() throws SQLException {
+        final String DB_URL = "jdbc:h2:~/src/shopDB";
+        final String USER = "user";
+        final String PASS = "password";
+
+        Connection conn = DriverManager.getConnection(DB_URL, USER, PASS);
+
+        return conn;
+    }
+
+
 
     @Bean
     public CommandLineRunner loadData(PasswordEncoder passwordEncoder, UserRepository userRepository,
@@ -42,73 +59,91 @@ public class DataGenerator {
 
             logger.info("Generating demo data");
 
-            logger.info("... generating 2 User entities...");
+            logger.info("... generating 2 Test User entities...");
             User user = new User();
-            user.setName("John Normal");
+            user.setName("user");
             user.setUsername("user");
             user.setHashedPassword(passwordEncoder.encode("user"));
-            user.setProfilePictureUrl(
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80");
             user.setRoles(Collections.singleton(Role.USER));
             userRepository.save(user);
+
+
             User admin = new User();
-            admin.setName("Emma Powerful");
+            admin.setName("admin");
             admin.setUsername("admin");
             admin.setHashedPassword(passwordEncoder.encode("admin"));
-            admin.setProfilePictureUrl(
-                    "https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=128&h=128&q=80");
             admin.setRoles(Set.of(Role.USER, Role.ADMIN));
             userRepository.save(admin);
-            logger.info("... generating 100 Item entities...");
-            ExampleDataGenerator<Item> itemRepositoryGenerator = new ExampleDataGenerator<>(Item.class,
-                    LocalDateTime.of(2022, 7, 27, 0, 0, 0));
-            itemRepositoryGenerator.setData(Item::setName, DataType.FOOD_PRODUCT_NAME);
-            itemRepositoryGenerator.setData(Item::setStock, DataType.NUMBER_UP_TO_1000);
-            itemRepositoryGenerator.setData(Item::setItemType, DataType.SENTENCE);
-            itemRepositoryGenerator.setData(Item::setPrice, DataType.NUMBER_UP_TO_100);
-            itemRepositoryGenerator.setData(Item::setImgURL, DataType.BOOK_IMAGE_URL);
-            itemRepository.saveAll(itemRepositoryGenerator.create(100, seed));
 
-            logger.info("... generating 100 Customer entities...");
-            ExampleDataGenerator<Customer> customerRepositoryGenerator = new ExampleDataGenerator<>(Customer.class,
-                    LocalDateTime.of(2022, 7, 27, 0, 0, 0));
-            customerRepositoryGenerator.setData(Customer::setName, DataType.FULL_NAME);
-            customerRepositoryGenerator.setData(Customer::setState, DataType.STATE);
-            customerRepositoryGenerator.setData(Customer::setBirthDate, DataType.PHONE_NUMBER);
-            customerRepositoryGenerator.setData(Customer::setCreateDate, DataType.DATE_OF_BIRTH);
-            customerRepositoryGenerator.setData(Customer::setGender, DataType.WORD);
-            customerRepository.saveAll(customerRepositoryGenerator.create(100, seed));
 
-            logger.info("... generating 100 Orders entities...");
-            ExampleDataGenerator<Orders> ordersRepositoryGenerator = new ExampleDataGenerator<>(Orders.class,
-                    LocalDateTime.of(2022, 7, 27, 0, 0, 0));
-            ordersRepositoryGenerator.setData(Orders::setCustId, DataType.NUMBER_UP_TO_100);
-            ordersRepositoryGenerator.setData(Orders::setTotalPrice, DataType.NUMBER_UP_TO_100);
-            ordersRepositoryGenerator.setData(Orders::setStatus, DataType.WORD);
-            ordersRepositoryGenerator.setData(Orders::setOrderDate, DataType.DATE_LAST_7_DAYS);
-            ordersRepositoryGenerator.setData(Orders::setDeliveryDate, DataType.DATE_NEXT_7_DAYS);
-            ordersRepository.saveAll(ordersRepositoryGenerator.create(100, seed));
 
-            logger.info("... generating 100 Discount Code entities...");
-            ExampleDataGenerator<DiscountCode> discountCodeRepositoryGenerator = new ExampleDataGenerator<>(
-                    DiscountCode.class, LocalDateTime.of(2022, 7, 27, 0, 0, 0));
-            discountCodeRepositoryGenerator.setData(DiscountCode::setCode, DataType.NUMBER_UP_TO_100);
-            discountCodeRepositoryGenerator.setData(DiscountCode::setPercentOff, DataType.NUMBER_UP_TO_100);
-            discountCodeRepositoryGenerator.setData(DiscountCode::setMaxDollarAmount, DataType.NUMBER_UP_TO_100);
-            discountCodeRepositoryGenerator.setData(DiscountCode::setStatus, DataType.NUMBER_UP_TO_100);
-            discountCodeRepositoryGenerator.setData(DiscountCode::setExpirationDate, DataType.DATE_OF_BIRTH);
-            discountCodeRepository.saveAll(discountCodeRepositoryGenerator.create(100, seed));
+            Connection conn = connectDB();
 
-            logger.info("... generating 100 Sale entities...");
-            ExampleDataGenerator<Sale> saleRepositoryGenerator = new ExampleDataGenerator<>(Sale.class,
-                    LocalDateTime.of(2022, 7, 27, 0, 0, 0));
-            saleRepositoryGenerator.setData(Sale::setItemId, DataType.NUMBER_UP_TO_100);
-            saleRepositoryGenerator.setData(Sale::setPercentOff, DataType.NUMBER_UP_TO_100);
-            saleRepositoryGenerator.setData(Sale::setStartDate, DataType.DATE_LAST_7_DAYS);
-            saleRepositoryGenerator.setData(Sale::setExpirationDate, DataType.DATE_NEXT_30_DAYS);
-            saleRepository.saveAll(saleRepositoryGenerator.create(100, seed));
+            Statement itemStatement = conn.createStatement();
+            ResultSet itemRs = itemStatement.executeQuery("SELECT * FROM ITEM");
 
-            logger.info("Generated demo data");
+            while(itemRs.next()){
+                Item item = new Item();
+                item.setName(itemRs.getString(1));
+                item.setItemType(itemRs.getString(2));
+                item.setStock(itemRs.getInt(3));
+                item.setPrice(itemRs.getInt(4));
+                item.setImgURL(itemRs.getString(5));
+                itemRepository.save(item);
+            }
+
+            Statement customerStatement = conn.createStatement();
+            ResultSet customerRs = customerStatement.executeQuery("SELECT * FROM CUSTOMER");
+
+            while(customerRs.next()){
+                Customer customer = new Customer();
+                customer.setName(customerRs.getString(1));
+                customer.setState(customerRs.getString(2));
+                customer.setBirthDate(customerRs.getString(3));
+                customer.setCreateDate(LocalDate.parse(customerRs.getString(4)));
+                customer.setGender(customerRs.getString(5));
+                customerRepository.save(customer);
+            }
+
+            Statement orderStatement = conn.createStatement();
+            ResultSet orderRs = orderStatement.executeQuery("SELECT * FROM ORDERS");
+
+            while(orderRs.next()){
+                Orders orders = new Orders();
+                orders.setCustId(orderRs.getInt(1));
+                orders.setTotalPrice(orderRs.getInt(2));
+                orders.setStatus(orderRs.getString(3));
+                orders.setDiscountCode(orderRs.getString(4));
+                orders.setOrderDate(LocalDate.parse(orderRs.getString(5)));
+                orders.setDeliveryDate(LocalDate.parse(orderRs.getString(6)));
+                ordersRepository.save(orders);
+            }
+
+
+            Statement discountStatement = conn.createStatement();
+            ResultSet discountRs = discountStatement.executeQuery("SELECT * FROM DISCOUNT");
+
+            while(discountRs.next()){
+                DiscountCode discountCode = new DiscountCode();
+                discountCode.setCode(discountRs.getInt(1));
+                discountCode.setPercentOff(discountRs.getInt(2));
+                discountCode.setMaxDollarAmount(discountRs.getInt(3));
+                discountCode.setStatus(discountRs.getInt(4));
+                discountCode.setExpirationDate(LocalDate.parse(discountRs.getString(5)));
+            }
+
+            Statement saleStatement = conn.createStatement();
+            ResultSet saleRs = saleStatement.executeQuery("SELECT * FROM SALE");
+
+            while(saleRs.next()){
+                Sale sale = new Sale();
+                sale.setItemId(saleRs.getInt(1));
+                sale.setPercentOff(saleRs.getInt(2));
+                sale.setStartDate(LocalDate.parse(saleRs.getString(3)));
+                sale.setExpirationDate(LocalDate.parse((saleRs.getString(4))));
+            }
+
+
         };
     }
 
